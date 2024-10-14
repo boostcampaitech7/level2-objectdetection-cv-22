@@ -14,6 +14,7 @@ from detectron2.data.datasets import register_coco_instances
 from detectron2.evaluation import COCOEvaluator
 from detectron2.data import build_detection_test_loader, build_detection_train_loader
 from detectron2.engine import hooks
+from detectron2.utils.events import EventWriter
 
 import wandb
 
@@ -39,7 +40,8 @@ cfg.merge_from_file(model_zoo.get_config_file('COCO-Detection/faster_rcnn_R_101_
 
 # Project Settings
 project_name = "faster_rcnn_base"
-wandb.init(project=project_name, config=dict(cfg))
+name  = "test"
+wandb.init(project=project_name, config=cfg.clone(), name=name)
 
 
 #----------------------------------------------------------------------------------------------------------------
@@ -47,7 +49,7 @@ wandb.init(project=project_name, config=dict(cfg))
 cfg.DATASETS.TRAIN = ('coco_trash_train',)
 cfg.DATASETS.TEST = ('coco_trash_test',)
 
-cfg.DATALOADER.NUM_WOREKRS = 2
+cfg.DATALOADER.NUM_WORKERS = 2
 
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url('COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml')
 
@@ -113,18 +115,33 @@ class MyTrainer(DefaultTrainer):
             
         return COCOEvaluator(dataset_name, cfg, False, output_folder)
     
-    @classmethod
-    def build_hooks(cls):
+    def build_hooks(self):
         hooks_list = super().build_hooks()
-        hooks_list.append(hooks.PeriodicWriter([WandbLogger()]))
+        hooks_list.append(hooks.PeriodicWriter([WandbLogger()], period=100))
         return hooks_list
 
 
 # wandb logger
-class WandbLogger(hooks.HookBase):
+class WandbLogger(EventWriter):
+    def __init__(self):
+        super().__init__()
+        self.trainer = None  # trainer를 저장할 변수 초기화
+
+    def write(self):
+        # 학습 중 발생하는 메트릭을 Wandb에 기록
+        if self.trainer is not None:
+            metrics = self.trainer.storage.latest()
+            wandb.log(metrics)
+
+    def set_trainer(self, trainer):
+        # trainer 객체 설정
+        self.trainer = trainer
+
     def after_step(self):
-        metrics = self.trainer.storage.latest()
-        wandb.log(metrics)
+        self.write()
+
+    def after_train(self):
+        self.write()
 
 os.makedirs(cfg.OUTPUT_DIR, exist_ok = True)
 
