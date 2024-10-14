@@ -13,10 +13,10 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import register_coco_instances
 from detectron2.evaluation import COCOEvaluator
 from detectron2.data import build_detection_test_loader, build_detection_train_loader
+from detectron2.engine import hooks
 
 import wandb
-# Project Settings
-project_name = "faster_rcnn_base"
+
 
 # Register Dataset
 try:
@@ -36,6 +36,10 @@ MetadataCatalog.get('coco_trash_train').thing_classes = ["General trash", "Paper
 # config 불러오기
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file('COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml'))
+
+# Project Settings
+project_name = "faster_rcnn_base"
+wandb.init(project=project_name, config=dict(cfg))
 
 
 #----------------------------------------------------------------------------------------------------------------
@@ -108,9 +112,19 @@ class MyTrainer(DefaultTrainer):
             output_folder = './output_eval'
             
         return COCOEvaluator(dataset_name, cfg, False, output_folder)
+    
+    @classmethod
+    def build_hooks(cls):
+        hooks_list = super().build_hooks()
+        hooks_list.append(hooks.PeriodicWriter([WandbLogger()]))
+        return hooks_list
 
 
-# 
+# wandb logger
+class WandbLogger(hooks.HookBase):
+    def after_step(self):
+        metrics = self.trainer.storage.latest()
+        wandb.log(metrics)
 
 os.makedirs(cfg.OUTPUT_DIR, exist_ok = True)
 
