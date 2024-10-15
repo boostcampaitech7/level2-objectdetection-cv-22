@@ -1,51 +1,60 @@
 import os
 import numpy as np
 import json
+from detectron2.utils.logger import setup_logger
+setup_logger()
 
+# 학습용
 from custom_trainer import MyTrainer
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
 from sklearn.model_selection import StratifiedGroupKFold
 
+# 데이터 로딩
 from detectron2.data.datasets import register_coco_instances
-from stratified_kfold import stratified_group_k_fold
-from detectron2.utils.logger import setup_logger
-setup_logger()
+from stratified_kfold import stratified_group_k_fold, save_fold_data
 
-from custom.config.config_22 import Config22
-
-# def get_distribution(y):
-#     y_distr = Counter(y)
-#     y_vals_sum = sum(y_distr.values())
-
-#     return [f'{y_distr[i]/y_vals_sum:.2%}' for i in range(np.max(y) +1)]
-
-
-# distrs = [get_distribution(y)]
-# index = ['training set']
-
+# 개인화
+# config경로 오류 시 터미널에서 ▼
+# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold
+from config.config_22 import Config22
+from datetime import datetime
 
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
 
+k = Config22.kfold
+seed = Config22.seed
+
+title = f'{Config22.model_name}_{datetime.now().strftime("%m-%d %H:%M")}'
+
 coco_fold_train = Config22.coco_fold_train
 coco_fold_test = Config22.coco_fold_test
 
-
 path_dataset = Config22.path_dataset
 
+path_output = Config22.path_output
+path_output_this = path_output + title
+
 path_model_pretrained = Config22.path_model_pretrained
+
+filename_fold_train = Config22.filename_fold_train
+filename_fold_val = Config22.filename_fold_val
+filename_fold_output = Config22.filename_fold_output
+
+os.makedirs(path_output, exist_ok=True)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────
 
 
 # COCO 데이터셋 등록 
 def register_datasets(path_dataset, fold_idx):
-    train_json = os.path.join(path_dataset, f'{Config22.filename_fold_train}{fold_idx}.json')
-    val_json = os.path.join(path_dataset, f'{Config22.filename_fold_val}{fold_idx}.json')
-    
+
     train_dataset_name = f'{coco_fold_train}{fold_idx}'
     val_dataset_name = f'{coco_fold_test}{fold_idx}'
+
+    train_json = os.path.join(path_dataset, f'{filename_fold_train}{fold_idx}.json')
+    val_json = os.path.join(path_dataset, f'{filename_fold_val}{fold_idx}.json')
     
     register_coco_instances(train_dataset_name, {}, train_json, path_dataset)
     register_coco_instances(val_dataset_name, {}, val_json, path_dataset)
@@ -56,6 +65,7 @@ def register_datasets(path_dataset, fold_idx):
 
 def kfold_training(k, cfg, path_dataset):
 
+    # 설정 경로 : /data/ephemeral/home/dataset/train.json
     with open(path_dataset + 'train.json') as f: 
         data = json.load(f)
 
@@ -65,20 +75,24 @@ def kfold_training(k, cfg, path_dataset):
     y = np.array([v[1] for v in var])
     groups = np.array([v[0] for v in var])
 
-    #cv = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=411)
-    cv = stratified_group_k_fold(X, y, groups, k)
+    if Config22.stratified == 0:
+        cv = StratifiedGroupKFold(n_splits=k, shuffle=True, random_state=seed)
+    elif Config22.stratified == 1:
+        cv = stratified_group_k_fold(X, y, groups, k)
+
 
     for fold_idx, (train_idx, val_idx) in enumerate(cv):
         print(f"Training fold {fold_idx + 1}/{k}...")
+
+        save_fold_data(data, train_idx, val_idx, fold_idx, path_dataset)
 
         train_name, val_name = register_datasets(path_dataset, fold_idx)
         
         cfg.DATASETS.TRAIN = (train_name,)
         cfg.DATASETS.TEST = (val_name,)
-        cfg.OUTPUT_DIR = f'./output_fold_{fold_idx}'
+        cfg.OUTPUT_DIR = f'{path_output_this}{filename_fold_output}{fold_idx}'
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
         
-
         train_model(cfg)
 
 
@@ -118,4 +132,4 @@ cfg.SOLVER.AMP.ENABLED = True
 # cfg.MODEL.ANCHOR_GENERATOR.OFFSET = 0.5
 
 
-kfold_training(5, cfg, path_dataset)
+kfold_training(k, cfg, path_dataset)
