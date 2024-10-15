@@ -2,11 +2,12 @@ import os
 import numpy as np
 import json
 
+from custom_trainer import MyTrainer
 from detectron2 import model_zoo
 from detectron2.engine import DefaultTrainer
 from detectron2.config import get_cfg
 from sklearn.model_selection import StratifiedGroupKFold
-from detectron2.data import DatasetCatalog, MetadataCatalog, build_detection_train_loader
+
 from detectron2.data.datasets import register_coco_instances
 from stratified_kfold import stratified_group_k_fold
 
@@ -32,6 +33,7 @@ coco_fold_test = 'coco_fold_test'
 
 path_annotation = '/data/ephemeral/home/dataset'
 path_dataset = '/data/ephemeral/home/dataset/'
+
 path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
 
 # ───────────────────────────────────────────────────────────────────────────────────────────
@@ -67,6 +69,7 @@ def kfold_training(k, annotation_file, cfg, path_dataset):
     cv = stratified_group_k_fold(X, y, groups, k)
 
     for fold_idx, (train_idx, val_idx) in enumerate(cv):
+        print(f"Training fold {fold_idx + 1}/{k}...")
 
         train_name, val_name = register_datasets(annotation_file, fold_idx, path_dataset)
         
@@ -80,7 +83,7 @@ def kfold_training(k, annotation_file, cfg, path_dataset):
 
 
 def train_model(cfg):
-    trainer = DefaultTrainer(cfg)
+    trainer = MyTrainer(cfg)
     trainer.resume_or_load(resume=False)
     trainer.train()
 
@@ -101,6 +104,18 @@ cfg.SOLVER.STEPS = (cfg.SOLVER.MAX_ITER // 2,
 
 cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
 cfg.MODEL.DEVICE = "cuda"
+cfg.SOLVER.AMP.ENABLED = True
+
+# cfg.MODEL.ROI_HEADS.LOSS_WEIGHT_CLS = 2.0
+#cfg.MODEL.RPN.LOSS_WEIGHT = 1.0
+# cfg.MODEL.RPN.NMS_THRESH = 0.5
+
+# cfg.MODEL.FPN.IN_FEATURES = ["res2", "res3", "res4", "res5"]
+# cfg.MODEL.RPN.IN_FEATURES = ["p2", "p3", "p4", "p5", "p6"]
+
+
+#cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32, 64, 128, 256, 512]]
+# cfg.MODEL.ANCHOR_GENERATOR.OFFSET = 0.5
 
 
 kfold_training(5, path_annotation, cfg, path_dataset)
