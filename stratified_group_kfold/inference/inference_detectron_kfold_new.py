@@ -100,14 +100,14 @@ for data in tqdm(test_loader):
         })
 
     all_targets.append([fold['targets'] for fold in fold_outputs])
-    targets, boxes, scores = ensemble_predictions(ensemble, fold_outputs, cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST)
+    targets, boxes, scores = ensemble_predictions(fold_outputs, cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST)
     
     for target, box, score in zip(targets, boxes, scores):
         prediction_string += f"{target} {score} {box[0]} {box[1]} {box[2]} {box[3]} "
 
     prediction_strings.append(prediction_string)
 
-    file_name = os.path.basename(data['f'])
+    file_name = os.path.basename(data['file_name'])
     file_names.append(data['file_name'])
 
 
