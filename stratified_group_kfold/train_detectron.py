@@ -4,15 +4,15 @@ import json
 
 from custom_trainer import MyTrainer
 from detectron2 import model_zoo
-from detectron2.engine import DefaultTrainer
 from detectron2.config import get_cfg
 from sklearn.model_selection import StratifiedGroupKFold
 
 from detectron2.data.datasets import register_coco_instances
 from stratified_kfold import stratified_group_k_fold
-
 from detectron2.utils.logger import setup_logger
 setup_logger()
+
+from custom.config.config_22 import Config22
 
 # def get_distribution(y):
 #     y_distr = Counter(y)
@@ -28,35 +28,35 @@ setup_logger()
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
 
-coco_fold_train = 'coco_fold_train'
-coco_fold_test = 'coco_fold_test'
+coco_fold_train = Config22.coco_fold_train
+coco_fold_test = Config22.coco_fold_test
 
-path_annotation = '/data/ephemeral/home/dataset'
-path_dataset = '/data/ephemeral/home/dataset/'
 
-path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
+path_dataset = Config22.path_dataset
+
+path_model_pretrained = Config22.path_model_pretrained
 
 # ───────────────────────────────────────────────────────────────────────────────────────────
 
 
 # COCO 데이터셋 등록 
-def register_datasets(annotation_path, fold_idx, path):
-    train_json = os.path.join(path_dataset, f'train_fold_{fold_idx}.json')
-    val_json = os.path.join(path_dataset, f'val_fold_{fold_idx}.json')
+def register_datasets(path_dataset, fold_idx):
+    train_json = os.path.join(path_dataset, f'{Config22.filename_fold_train}{fold_idx}.json')
+    val_json = os.path.join(path_dataset, f'{Config22.filename_fold_val}{fold_idx}.json')
     
     train_dataset_name = f'{coco_fold_train}{fold_idx}'
     val_dataset_name = f'{coco_fold_test}{fold_idx}'
     
-    register_coco_instances(train_dataset_name, {}, train_json, path)
-    register_coco_instances(val_dataset_name, {}, val_json, path)
+    register_coco_instances(train_dataset_name, {}, train_json, path_dataset)
+    register_coco_instances(val_dataset_name, {}, val_json, path_dataset)
     
     return train_dataset_name, val_dataset_name
 
 
 
-def kfold_training(k, annotation_file, cfg, path_dataset):
+def kfold_training(k, cfg, path_dataset):
 
-    with open(annotation_file + '/train.json') as f: 
+    with open(path_dataset + 'train.json') as f: 
         data = json.load(f)
 
     var = [(ann['image_id'], ann['category_id']) for ann in data['annotations']]
@@ -71,7 +71,7 @@ def kfold_training(k, annotation_file, cfg, path_dataset):
     for fold_idx, (train_idx, val_idx) in enumerate(cv):
         print(f"Training fold {fold_idx + 1}/{k}...")
 
-        train_name, val_name = register_datasets(annotation_file, fold_idx, path_dataset)
+        train_name, val_name = register_datasets(path_dataset, fold_idx)
         
         cfg.DATASETS.TRAIN = (train_name,)
         cfg.DATASETS.TEST = (val_name,)
@@ -118,4 +118,4 @@ cfg.SOLVER.AMP.ENABLED = True
 # cfg.MODEL.ANCHOR_GENERATOR.OFFSET = 0.5
 
 
-kfold_training(5, path_annotation, cfg, path_dataset)
+kfold_training(5, cfg, path_dataset)
