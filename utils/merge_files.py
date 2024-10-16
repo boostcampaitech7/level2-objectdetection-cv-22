@@ -1,7 +1,27 @@
 import os
 import json
 
+"""
+    원래 데이터에서 특정 데이터를 제외하고 json 파일 다시 저장
+    json 파일은 5개 카테고리("info", "licenses", "images", "annotations", "categories")
+    
+    불러 올 파일의 경로 : path_dataset
+    불러 올 파일의 이름 : input_train_json
+    
+    제외할 파일의 이름 : input_fold_json
+    저장할 파일의 이름 : output_json
+"""
+# 경로 ─────────────────────────────────────────────────────────────
+
 path_dataset = '/data/ephemeral/home/dataset/'
+
+input_train_json = path_dataset + "train.json"
+input_fold_json = path_dataset + "train_fold_3.json"
+
+output_json = path_dataset + "train_merge.json"
+
+# ──────────────────────────────────────────────────────────────────
+
 
 def exclude_fold_from_train(input_train_json, input_fold_json, output_json):
     
@@ -30,9 +50,5 @@ def exclude_fold_from_train(input_train_json, input_fold_json, output_json):
 
     print(f"Exclusion complete. Result saved to {output_json}")
 
-input_train_json = path_dataset + "train.json"
-input_fold_json = path_dataset + "train_fold_3.json"
-
-output_json = path_dataset + "train_merge.json"
 
 exclude_fold_from_train(input_train_json, input_fold_json, output_json)
