@@ -1,17 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# ## fold 추론용
-
-# ### 1. 모듈 불러오기
-
-# In[1]:
-
-
 import os
 import copy
 from tqdm import tqdm
 import pandas as pd
+import numpy as np
 from detectron2.data import detection_utils as utils
 from detectron2.utils.logger import setup_logger
 setup_logger()
@@ -23,98 +14,68 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import register_coco_instances
 from detectron2.data import build_detection_test_loader
 
-# fold 관련
-import numpy as np
+# 개인화
+# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold/inference
+from config.config_22 import Config22
+from inference_ensemble import ensemble_predictions
+from inference_utils import MyMapper
 
+"""
+    stratifiedGroupKFold로 나눈 파일 전체를 평균 앙상블하여 inference
+"""
+# 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
 
-# ### 2. 데이터 등록
-# #### 리소스 등록 및 경로 설정
+k = Config22.kfold
+seed = Config22.seed
 
-# In[2]:
+coco_dataset_test = Config22.coco_dataset_test
+coco_fold_test = Config22.coco_fold_test
 
+path_dataset = Config22.path_dataset
 
-coco_dataset_test = 'coco_trash_test'
-coco_fold_test = 'coco_fold_test'
+path_output = Config22.path_output
+path_output_eval = Config22.path_output_eval
 
-path_dataset = '/data/ephemeral/home/dataset/'
-path_output_eval = '/data/ephemeral/home/baseline/custom/output_eval'
-path_output = '/data/ephemeral/home/baseline/custom/output_fold'
+path_model_pretrained = Config22.path_model_pretrained
 
-path_weights = 'model_final.pth'
+filename_fold_train = Config22.filename_fold_train
+filename_fold_val = Config22.filename_fold_val
+filename_fold_output = Config22.filename_fold_output
+filename_weights = Config22.filename_weights
+filename_this = Config22.filename_this
 
-# 변경이 필요한 부분
-path_model_pretrained = 'COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml'
-model_title = path_model_pretrained.split("/")[1].split(".")[0]
+ensemble = Config22.ensemble
 
-
-# #### *Config 설정
-
-# In[3]:
-
+# ───────────────────────────────────────────────────────────────────────────────────────────
 
 def setup_cfg():
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(path_model_pretrained))
-    cfg.OUTPUT_DIR = path_output
+    cfg.OUTPUT_DIR = path_output + filename_fold_output + filename_this
     cfg.DATASETS.TEST = (coco_dataset_test,)
 
-    cfg.DATALOADER.NUM_WOREKRS = 4
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 10
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.6
-    cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = 0.6
+    cfg.DATALOADER.NUM_WOREKRS = Config22.NUM_WOREKRS
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = Config22.ROI_HEADS_BATCH_SIZE_PER_IMAGE
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = Config22.ROI_HEADS_NUM_CLASSES
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = Config22.ROI_HEADS_SCORE_THRESH_TEST
+    cfg.MODEL.ROI_HEADS.NMS_THRESH_TEST = Config22.ROI_HEADS_NMS_THRESH_TEST
 
-    cfg.MODEL.RPN.NMS_THRESH = 0.5
+    cfg.MODEL.RPN.NMS_THRESH = Config22.RPN_NMS_THRESH
 
     return cfg
 
 
-# #### 데이터셋 등록
+all_targets = []
 
-# In[4]:
+prediction_strings = []
+file_names = []
 
 
 if coco_dataset_test not in DatasetCatalog.list():
     register_coco_instances(coco_dataset_test, {}, path_dataset + 'test.json', path_dataset)
 
 cfg = setup_cfg()
-
-
-# In[5]:
-
-
-def MyMapper(dataset_dict):
-    
-    dataset_dict = copy.deepcopy(dataset_dict)
-    image = utils.read_image(dataset_dict['file_name'], format='BGR')
-    
-    dataset_dict['image'] = image
-    
-    return dataset_dict
-
-# test loader
 test_loader = build_detection_test_loader(cfg, coco_dataset_test, MyMapper)
-
-
-# In[6]:
-
-
-# 각 fold 모델의 예측을 받아 평균을 냄
-def ensemble_predictions(fold_outputs):
-    final_scores = np.mean([fold['scores'] for fold in fold_outputs], axis=0)
-    final_boxes = np.mean([fold['boxes'] for fold in fold_outputs], axis=0)
-    final_targets = np.mean([fold['targets'] for fold in fold_outputs], axis=0)
-
-    final_targets = np.round(final_targets).astype(int)
-    
-    return final_targets, final_boxes, final_scores
-
-
-# In[7]:
-
-
-prediction_strings = []
-file_names = []
 
 for data in tqdm(test_loader):
     
@@ -123,8 +84,7 @@ for data in tqdm(test_loader):
     data = data[0]
     
     for fold_idx in range(5):
-
-        path_weight = os.path.join(f'{cfg.OUTPUT_DIR}_{fold_idx}', path_weights)
+        path_weight = os.path.join(f'{cfg.OUTPUT_DIR}{fold_idx}', filename_weights)
         
         if not os.path.exists(path_weight):    
             print("파일 없음", path_weight)
@@ -135,28 +95,33 @@ for data in tqdm(test_loader):
 
         outputs = predictor(data['image'])['instances']
 
+        targets = outputs.pred_classes.cpu().tolist()
+        boxes = [i.cpu().detach().numpy() for i in outputs.pred_boxes]
+        scores = outputs.scores.cpu().tolist()
+
         fold_outputs.append({
             'targets': outputs.pred_classes.cpu().tolist(),
             'boxes': [i.cpu().detach().numpy() for i in outputs.pred_boxes],
             'scores': outputs.scores.cpu().tolist(),
         })
 
-    # 앙상블 예측값 계산
-    targets, boxes, scores = ensemble_predictions(fold_outputs)
     
-    for target, box, score in zip(targets, boxes, scores):
-        prediction_string += f"{target} {score} {box[0]} {box[1]} {box[2]} {box[3]} "
+    targets, boxes, scores = ensemble_predictions(fold_outputs, cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST)
+    
+    for target, box, score in zip(targets,boxes,scores):
+        prediction_string += (str(target) + ' ' + str(score) + ' ' + str(box[0]) + ' ' 
+        + str(box[1]) + ' ' + str(box[2]) + ' ' + str(box[3]) + ' ')
+
 
     prediction_strings.append(prediction_string)
+
+    file_name = os.path.basename(data['file_name'])
     file_names.append(data['file_name'])
 
 
-# In[ ]:
-
-
+# submission 파일 저장
 submission = pd.DataFrame({
     'PredictionString': prediction_strings,
     'image_id': file_names
 })
-submission.to_csv(os.path.join('/data/ephemeral/home/baseline/custom', f'submission_{model_title}.csv'), index=False)
-
+submission.to_csv(os.path.join(path_output + filename_this, f'submission_{filename_this}.csv'), index=False)
