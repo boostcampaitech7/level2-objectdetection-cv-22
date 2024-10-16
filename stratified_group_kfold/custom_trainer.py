@@ -54,6 +54,7 @@ class MyTrainer(DefaultTrainer):
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
             os.makedirs(output_folder, exist_ok=True)
+        return COCOEvaluator(dataset_name, output_dir=output_folder)
 
     def build_hooks(self):
         hooks_list = super().build_hooks()
@@ -63,7 +64,7 @@ class MyTrainer(DefaultTrainer):
         hooks_list.append(hooks.PeriodicWriter([wandb_logger], period=100))
         return hooks_list
 
-        return COCOEvaluator(dataset_name, output_dir=output_folder)
+        
 
 # wandb logger
 class WandbLogger(EventWriter):
