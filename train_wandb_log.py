@@ -21,12 +21,12 @@ import wandb
 
 # Register Dataset
 try:
-    register_coco_instances('coco_trash_train', {}, '../../dataset/train.json', '../../dataset/')
+    register_coco_instances('coco_trash_train', {}, '../../dataset/train_fold_0.json', '../../dataset/')
 except AssertionError:
     pass
 
 try:
-    register_coco_instances('coco_trash_test', {}, '../../dataset/test.json', '../../dataset/')
+    register_coco_instances('coco_trash_test', {}, '../../dataset/val_fold_0.json', '../../dataset/')
 except AssertionError:
     pass
 
@@ -65,7 +65,7 @@ cfg.OUTPUT_DIR = f'./{project_name}'
 cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 10
 
-cfg.TEST.EVAL_PERIOD = 3000
+cfg.TEST.EVAL_PERIOD = 100
 #----------------------------------------------------------------------------------------------------------------
 
 
@@ -113,11 +113,19 @@ class MyTrainer(DefaultTrainer):
             os.makedirs('./output_eval', exist_ok = True)
             output_folder = './output_eval'
             
-        return COCOEvaluator(dataset_name, cfg, False, output_folder)
+        return COCOEvaluator(
+            dataset_name=dataset_name, 
+            tasks=["bbox"],  # 바운딩 박스 task를 평가
+            distributed=False,  # 분산 학습이 아닌 경우 False
+            output_dir=output_folder
+        )
     
     def build_hooks(self):
         hooks_list = super().build_hooks()
-        hooks_list.append(hooks.PeriodicWriter([WandbLogger()], period=100))
+        # WandbLogger의 trainer 설정
+        wandb_logger = WandbLogger()
+        wandb_logger.set_trainer(self)
+        hooks_list.append(hooks.PeriodicWriter([wandb_logger], period=100))
         return hooks_list
 
 
@@ -130,7 +138,8 @@ class WandbLogger(EventWriter):
     def write(self):
         # 학습 중 발생하는 메트릭을 Wandb에 기록
         if self.trainer is not None:
-            metrics = self.trainer.storage.latest()
+            # 모든 메트릭을 가져와서 Wandb에 로그
+            metrics = {k: v.median(20) for k, v in self.trainer.storage.histories().items()}
             wandb.log(metrics)
 
     def set_trainer(self, trainer):
