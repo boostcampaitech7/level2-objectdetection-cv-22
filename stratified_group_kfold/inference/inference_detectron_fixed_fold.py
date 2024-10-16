@@ -11,13 +11,17 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import register_coco_instances
 from detectron2.data import build_detection_test_loader
 
-# 개인화
-# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold/inference
-from config.config_22 import Config22
-from inference_utils import MyMapper
-
+# 시각화
 from detectron2.utils.visualizer import Visualizer
 import cv2
+
+# 개인화
+# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold/inference
+import sys
+sys.path.append('/data/ephemeral/home/repo')
+from config.config_22 import Config22
+
+from stratified_group_kfold.inference.inference_utils import MyMapper
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
 
@@ -40,14 +44,14 @@ filename_fold_output = Config22.filename_fold_output
 filename_weights = Config22.filename_weights
 filename_this = Config22.filename_this
 
-path_weight = os.path.join(f'{path_output}', filename_weights)
+path_weight = os.path.join(f'{path_output}{filename_this}', filename_weights)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────
 
 def setup_cfg():
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(path_model_pretrained))
-    cfg.OUTPUT_DIR = path_output + filename_fold_output + filename_this
+    cfg.OUTPUT_DIR = path_output + filename_this
     cfg.DATASETS.TEST = (coco_dataset_test,)
     
     cfg.MODEL.WEIGHTS = path_weight
@@ -71,7 +75,7 @@ if coco_dataset_test not in DatasetCatalog.list():
     register_coco_instances(coco_dataset_test, {}, path_dataset + 'test.json', path_dataset)
 
 cfg = setup_cfg()
-test_loader = build_detection_test_loader(cfg, coco_dataset_test, MyMapper)
+test_loader = build_detection_test_loader(cfg, coco_dataset_test, MyMapper, num_workers=4)
 predictor = DefaultPredictor(cfg)
 
 for data in tqdm(test_loader):

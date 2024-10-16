@@ -93,17 +93,24 @@ for data in tqdm(test_loader):
 
         outputs = predictor(data['image'])['instances']
 
+        targets = outputs.pred_classes.cpu().tolist()
+        boxes = [i.cpu().detach().numpy() for i in outputs.pred_boxes]
+        scores = outputs.scores.cpu().tolist()
+
+        # 여기 고치기
         fold_outputs.append({
             'targets': outputs.pred_classes.cpu().tolist(),
             'boxes': [i.cpu().detach().numpy() for i in outputs.pred_boxes],
             'scores': outputs.scores.cpu().tolist(),
         })
 
-    all_targets.append([fold['targets'] for fold in fold_outputs])
+    
     targets, boxes, scores = ensemble_predictions(fold_outputs, cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST)
     
-    for target, box, score in zip(targets, boxes, scores):
-        prediction_string += f"{target} {score} {box[0]} {box[1]} {box[2]} {box[3]} "
+    for target, box, score in zip(targets,boxes,scores):
+        prediction_string += (str(target) + ' ' + str(score) + ' ' + str(box[0]) + ' ' 
+        + str(box[1]) + ' ' + str(box[2]) + ' ' + str(box[3]) + ' ')
+
 
     prediction_strings.append(prediction_string)
 
@@ -117,5 +124,3 @@ submission = pd.DataFrame({
     'image_id': file_names
 })
 submission.to_csv(os.path.join(path_output + filename_this, f'submission_{filename_this}.csv'), index=False)
-
-np.save('all_targets.npy', all_targets)
