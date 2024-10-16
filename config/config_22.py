@@ -22,17 +22,19 @@ class Config22:
     # 추론 시 폴더 이름 반드시 넣어주기
     filename_this = ''
 
-    path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
+    #path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
+    path_model_pretrained = "data/ephemeral/home/Swin-Transformer-Object-Detection/config/faster_rcnn_r101_2x.py"
 
     # 기타
     seed = 22
     model_name = path_model_pretrained.split("/")[1].split(".")[0]
 
     NUM_WOREKRS = 4
+    BACKBONE_NAME = ''
 
     ROI_HEADS_BATCH_SIZE_PER_IMAGE = 128                # Default : 128
     ROI_HEADS_NUM_CLASSES = 10
-    ROI_HEADS_SCORE_THRESH_TEST = 0.6                   # Default : 0.05
+    ROI_HEADS_SCORE_THRESH_TEST = 0.05                   # Default : 0.05
     ROI_HEADS_NMS_THRESH_TEST = 0.6                     # Default : 0.5
 
     RPN_NMS_THRESH = 0.5                                # Default : 0.7
