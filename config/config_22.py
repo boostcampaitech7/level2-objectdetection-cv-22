@@ -20,10 +20,10 @@ class Config22:
 
     ############################################################
     # 추론 시 폴더 이름 반드시 넣어주기
-    filename_this = ''
+    filename_this = 'faster_rcnn_R_101_FPN_3x_10-16 15:17output_fold_3'
 
-    #path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
-    path_model_pretrained = "data/ephemeral/home/Swin-Transformer-Object-Detection/config/faster_rcnn_r101_2x.py"
+    path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
+    #path_model_pretrained = "data/ephemeral/home/Swin-Transformer-Object-Detection/config/faster_rcnn_r101_2x.py"
 
     # 기타
     seed = 22

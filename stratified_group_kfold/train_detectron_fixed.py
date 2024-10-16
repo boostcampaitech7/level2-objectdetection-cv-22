@@ -16,8 +16,12 @@ from detectron2.data.datasets import register_coco_instances
 # 개인화
 # config경로 오류 시 터미널에서 ▼
 # export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold
+import sys
+sys.path.append('/data/ephemeral/home/repo')
 from config.config_22 import Config22
 from datetime import datetime
+import wandb
+
 
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
@@ -47,6 +51,8 @@ filename_fold_output = Config22.filename_fold_output
 fold_idx = 3
 
 os.makedirs(path_output, exist_ok=True)
+wandb.init(project="2024 부스트캠프 재활용품 분류대회(22, CSV)", 
+           name=title)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────
 
@@ -54,17 +60,20 @@ os.makedirs(path_output, exist_ok=True)
 # COCO 데이터셋 등록 
 def register_datasets(path_dataset, fold_idx):
 
-    train_dataset_name = f'{coco_fold_train}{fold_idx}'
-    val_dataset_name = f'{coco_fold_test}{fold_idx}'
+    train_dataset_name = f'{coco_fold_train}_{fold_idx}'
+    val_dataset_name = f'{coco_fold_test}_{fold_idx}'
 
     train_json = os.path.join(path_dataset, f'{filename_fold_train}{fold_idx}.json')
     val_json = os.path.join(path_dataset, f'{filename_fold_val}{fold_idx}.json')
     
-    register_coco_instances(train_dataset_name, {}, train_json, path_dataset)
-    register_coco_instances(val_dataset_name, {}, val_json, path_dataset)
+    if train_dataset_name not in DatasetCatalog.list():
+        register_coco_instances(train_dataset_name, {}, train_json, path_dataset)
 
-    data_size = len(DatasetCatalog.get(coco_dataset_train))
-    MetadataCatalog.get(coco_dataset_train).thing_classes=['General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 
+    if val_dataset_name not in DatasetCatalog.list():    
+        register_coco_instances(val_dataset_name, {}, val_json, path_dataset)
+
+    data_size = len(DatasetCatalog.get(train_dataset_name))
+    MetadataCatalog.get(train_dataset_name).thing_classes=['General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 
                                                            'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
     
     return train_dataset_name, val_dataset_name, data_size
@@ -114,5 +123,5 @@ cfg.SOLVER.AMP.ENABLED = True
 #cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32, 64, 128, 256, 512]]
 # cfg.MODEL.ANCHOR_GENERATOR.OFFSET = 0.5
 
-
+register_datasets(path_dataset, fold_idx)
 train_model(cfg, path_dataset, fold_idx)
