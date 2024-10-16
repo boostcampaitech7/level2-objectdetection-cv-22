@@ -20,7 +20,7 @@ class Config22:
 
     ############################################################
     # 추론 시 폴더 이름 반드시 넣어주기
-    filename_this = 'faster_rcnn_R_101_FPN_3x_10-16 15:17output_fold_3'
+    filename_this = ''
 
     path_model_pretrained = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
     #path_model_pretrained = "data/ephemeral/home/Swin-Transformer-Object-Detection/config/faster_rcnn_r101_2x.py"
@@ -30,14 +30,14 @@ class Config22:
     model_name = path_model_pretrained.split("/")[1].split(".")[0]
 
     NUM_WOREKRS = 4
+    SOLVER_IMS_PER_BATCH = 4
+
     BACKBONE_NAME = ''
 
     ROI_HEADS_BATCH_SIZE_PER_IMAGE = 128                # Default : 128
     ROI_HEADS_NUM_CLASSES = 10
-    ROI_HEADS_SCORE_THRESH_TEST = 0.05                   # Default : 0.05
-    ROI_HEADS_NMS_THRESH_TEST = 0.6                     # Default : 0.5
 
-    RPN_NMS_THRESH = 0.5                                # Default : 0.7
+    RPN_NMS_THRESH = 0.7                                # Default : 0.7
     
     # ──────────────────────────────── 학습 설정 ───────────────────────────────────
 
@@ -45,6 +45,14 @@ class Config22:
     kfold = 5
     stratified = 1
 
+    EVAL_PERIOD = 500
+    BASE_LR = 0.001
+    MAX_ITER = 8000
+
     # ──────────────────────────────── 추론 설정 ───────────────────────────────────
 
     ensemble = 'mean'                                     # 평균: mean / 다수결 : major
+    visualized = False                                    # inference_detectron_fixed_fold에서 visualization 여부
+
+    ROI_HEADS_SCORE_THRESH_TEST = 0.05                  # Default : 0.05
+    ROI_HEADS_NMS_THRESH_TEST = 0.5                     # Default : 0.5

@@ -15,18 +15,24 @@ from detectron2.data import build_detection_test_loader
 from detectron2.utils.visualizer import Visualizer
 import cv2
 
-# 개인화
-# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold/inference
 import sys
 sys.path.append('/data/ephemeral/home/repo')
+
+# 개인화
 from config.config_22 import Config22
 
 from stratified_group_kfold.inference.inference_utils import MyMapper
+
+"""
+    고정된 1개의 파일만 inference
+    (전체 파일에 대한 시각화 포함)
+"""
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
 
 k = Config22.kfold
 seed = Config22.seed
+visualized = Config22.visualized
 
 coco_dataset_test = Config22.coco_dataset_test
 coco_fold_test = Config22.coco_fold_test
@@ -97,12 +103,13 @@ for data in tqdm(test_loader):
     prediction_strings.append(prediction_string)
     file_names.append(data['file_name'].replace(path_dataset,''))
 
-        # 시각화 코드
-    v = Visualizer(data['image'], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1.2)
-    out = v.draw_instance_predictions(outputs.to("cpu"))
+    # 시각화 코드
+    if visualized:
+        v = Visualizer(data['image'], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1.2)
+        out = v.draw_instance_predictions(outputs.to("cpu"))
 
-    result_file = os.path.join(cfg.OUTPUT_DIR, f"visualization_{data['file_name'].split('/')[-1]}")
-    cv2.imwrite(result_file, out.get_image()[:, :, ::-1])
+        result_file = os.path.join(cfg.OUTPUT_DIR, f"visualization_{data['file_name'].split('/')[-1]}")
+        cv2.imwrite(result_file, out.get_image()[:, :, ::-1])
  
 
 submission = pd.DataFrame()

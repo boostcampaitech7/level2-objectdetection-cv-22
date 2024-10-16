@@ -1,6 +1,4 @@
 import os
-import numpy as np
-import json
 from detectron2.utils.logger import setup_logger
 setup_logger()
 
@@ -13,18 +11,21 @@ from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 
-# 개인화
-# config경로 오류 시 터미널에서 ▼
-# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold
 import sys
 sys.path.append('/data/ephemeral/home/repo')
+
+# 개인화
 from config.config_22 import Config22
 from datetime import datetime
 import wandb
 
-
+""" 
+    train_fold_{fold_idx}와 val_fold_{fold_idx}만 사용하여 train
+"""
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
+
+fold_idx = 3
 
 k = Config22.kfold
 seed = Config22.seed
@@ -47,8 +48,6 @@ path_model_pretrained = Config22.path_model_pretrained
 filename_fold_train = Config22.filename_fold_train
 filename_fold_val = Config22.filename_fold_val
 filename_fold_output = Config22.filename_fold_output
-
-fold_idx = 3
 
 os.makedirs(path_output, exist_ok=True)
 wandb.init(project="2024 부스트캠프 재활용품 분류대회(22, CSV)", 
@@ -99,16 +98,16 @@ cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file(path_model_pretrained))
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(path_model_pretrained)
 
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 10
-cfg.TEST.EVAL_PERIOD = 500
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = Config22.ROI_HEADS_NUM_CLASSES
+cfg.TEST.EVAL_PERIOD = Config22.EVAL_PERIOD
 
-cfg.SOLVER.IMS_PER_BATCH = 4
-cfg.SOLVER.BASE_LR = 0.001
-cfg.SOLVER.MAX_ITER = 8000
+cfg.SOLVER.IMS_PER_BATCH = Config22.SOLVER_IMS_PER_BATCH
+cfg.SOLVER.BASE_LR = Config22.BASE_LR
+cfg.SOLVER.MAX_ITER = Config22.MAX_ITER
 cfg.SOLVER.STEPS = (cfg.SOLVER.MAX_ITER // 2, 
                     cfg.SOLVER.MAX_ITER * 2 //3)
 
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
+cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = Config22.ROI_HEADS_BATCH_SIZE_PER_IMAGE
 cfg.MODEL.DEVICE = "cuda"
 cfg.SOLVER.AMP.ENABLED = True
 

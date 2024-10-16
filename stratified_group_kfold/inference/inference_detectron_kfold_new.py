@@ -20,7 +20,9 @@ from config.config_22 import Config22
 from inference_ensemble import ensemble_predictions
 from inference_utils import MyMapper
 
-
+"""
+    stratifiedGroupKFold로 나눈 파일 전체를 평균 앙상블하여 inference
+"""
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
 
 k = Config22.kfold
@@ -97,7 +99,6 @@ for data in tqdm(test_loader):
         boxes = [i.cpu().detach().numpy() for i in outputs.pred_boxes]
         scores = outputs.scores.cpu().tolist()
 
-        # 여기 고치기
         fold_outputs.append({
             'targets': outputs.pred_classes.cpu().tolist(),
             'boxes': [i.cpu().detach().numpy() for i in outputs.pred_boxes],

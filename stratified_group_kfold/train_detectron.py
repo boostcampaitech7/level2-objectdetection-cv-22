@@ -11,14 +11,17 @@ from detectron2.config import get_cfg
 from sklearn.model_selection import StratifiedGroupKFold
 
 # 데이터 로딩
+from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 from stratified_kfold import stratified_group_k_fold, save_fold_data
 
+import sys
+sys.path.append('/data/ephemeral/home/repo')
+
 # 개인화
-# config경로 오류 시 터미널에서 ▼
-# export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold
 from config.config_22 import Config22
 from datetime import datetime
+import wandb
 
 
 # 경로 설정 ─────────────────────────────────────────────────────────────────────────────────
@@ -43,6 +46,8 @@ filename_fold_val = Config22.filename_fold_val
 filename_fold_output = Config22.filename_fold_output
 
 os.makedirs(path_output, exist_ok=True)
+wandb.init(project="2024 부스트캠프 재활용품 분류대회(22, CSV)", 
+           name=title)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────
 
@@ -58,6 +63,10 @@ def register_datasets(path_dataset, fold_idx):
     
     register_coco_instances(train_dataset_name, {}, train_json, path_dataset)
     register_coco_instances(val_dataset_name, {}, val_json, path_dataset)
+
+    data_size = len(DatasetCatalog.get(train_dataset_name))
+    MetadataCatalog.get(train_dataset_name).thing_classes=['General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 
+                                                           'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
     
     return train_dataset_name, val_dataset_name
 
@@ -71,7 +80,7 @@ def kfold_training(k, cfg, path_dataset):
 
     var = [(ann['image_id'], ann['category_id']) for ann in data['annotations']]
 
-    X = np.ones((len(data['annotations']),1))
+    X = np.ones((len(data['annotations']), 1))
     y = np.array([v[1] for v in var])
     groups = np.array([v[0] for v in var])
 
@@ -107,16 +116,16 @@ cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file(path_model_pretrained))
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(path_model_pretrained)
 
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 10
-cfg.TEST.EVAL_PERIOD = 500
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = Config22.ROI_HEADS_NUM_CLASSES
+cfg.TEST.EVAL_PERIOD = Config22.EVAL_PERIOD
 
-cfg.SOLVER.IMS_PER_BATCH = 4
-cfg.SOLVER.BASE_LR = 0.001
-cfg.SOLVER.MAX_ITER = 8000
+cfg.SOLVER.IMS_PER_BATCH = Config22.SOLVER_IMS_PER_BATCH
+cfg.SOLVER.BASE_LR = Config22.BASE_LR
+cfg.SOLVER.MAX_ITER = Config22.MAX_ITER
 cfg.SOLVER.STEPS = (cfg.SOLVER.MAX_ITER // 2, 
                     cfg.SOLVER.MAX_ITER * 2 //3)
 
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
+cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = Config22.ROI_HEADS_BATCH_SIZE_PER_IMAGE
 cfg.MODEL.DEVICE = "cuda"
 cfg.SOLVER.AMP.ENABLED = True
 
