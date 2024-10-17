@@ -17,13 +17,13 @@ backend_args = None
 train_pipeline = [
     dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', scale=(512, 512), keep_ratio=True), # 1024 -> 512 gpu 메모리 부족
+    dict(type='Resize', scale=(900, 900), keep_ratio=True), # 1024 -> 512 gpu 메모리 부족
     dict(type='RandomFlip', prob=0.5),
     dict(type='PackDetInputs')
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile', backend_args=backend_args),
-    dict(type='Resize', scale=(512, 512), keep_ratio=True),
+    dict(type='Resize', scale=(900, 900), keep_ratio=True), # 1024 -> 512 gpu 메모리 부족
     # If you don't have a gt annotation, delete the pipeline
     dict(type='LoadAnnotations', with_bbox=True),
     dict(
@@ -41,11 +41,12 @@ train_dataloader = dict(
         type=dataset_type,
         metainfo=metainfo,
         data_root=data_root,
-        ann_file='/data/ephemeral/home/dataset/train.json',
+        ann_file='/data/ephemeral/home/dataset/k-fold/train_fold_3.json',
         data_prefix=dict(img=''),
         filter_cfg=dict(filter_empty_gt=True, min_size=32),
         pipeline=train_pipeline,
         backend_args=backend_args))
+
 val_dataloader = dict(
     batch_size=1,
     num_workers=5,
@@ -83,14 +84,15 @@ val_evaluator = dict(
     type='CocoMetric',
     ann_file='/data/ephemeral/home/dataset/k-fold/val_fold_3.json',
     metric='bbox',
-    format_only=False,
+    format_only=True,
     classwise=True,
-    backend_args=backend_args)
+    outfile_prefix='./work_dirs/cascade_rcnn_r50_fpn_1x_coco/val')  # 이 줄 추가
 
+# test_evaluator 수정
 test_evaluator = dict(
     type='CocoMetric',
-    ann_file=data_root + 'test.json',
+    ann_file='/data/ephemeral/home/dataset/test.json',
     metric='bbox',
-    format_only=False,
+    format_only=True,
     classwise=True,
-    backend_args=backend_args)
+    outfile_prefix='./work_dirs/cascade_rcnn_r50_fpn_1x_coco/test')  # 이 줄 추가

@@ -9,6 +9,9 @@ work_dir='/data/ephemeral/home/baseline/mmdetection/work_dirs/cascade_rcnn_swin_
 
 pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth'  # noqa
 
+
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=2, val_interval=1)
+
 # model settings
 model = dict(
     type='CascadeRCNN',
@@ -189,6 +192,9 @@ env_cfg = dict(
     dist_cfg=dict(backend='nccl'),
 )
 
+
+##########################################
+
 vis_backends = [dict(type='LocalVisBackend')]
 visualizer = dict(
     type='DetLocalVisualizer', vis_backends=vis_backends, name='visualizer')
@@ -198,27 +204,22 @@ log_level = 'INFO'
 load_from = None
 resume = False
 
-# wandb log 추가
-log_config = dict(
-    interval=50,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='MMDetWandbHook',
-            init_kwargs=dict(
-                project='cascade_rcnn', # project 명
-                entity='ljh19990825-naver', # 팀 명
-                name = 'cascade_rcnn_swin_T_fpn_1x_coco_custom' # wandb에 표시할 이름
-            ),
-            #interval=50,
-            log_checkpoint=True,
-            bbox_score_thr=0.7,
-            # 아래는 val 관련
-            #log_checkpoint_metadata=True,
-            #num_eval_images=100
-            )
-    ])
+
+
+
+vis_backends = [
+    dict(type='LocalVisBackend'),
+    dict(type='WandbVisBackend',
+         init_kwargs={
+            'project': 'mmdetection',
+            'entity': 'ljh19990825-naver',
+            'group': 'cascade_rcnn',
+            'name' : 'cascade_rcnn_swin_L_fpn_1x_coco'
+         })
+]
 
 fp16 = dict(loss_scale='dynamic')
+
 
 checkpoint_config = dict(interval=1, save_best='auto', max_keep_ckpts=3)
 
