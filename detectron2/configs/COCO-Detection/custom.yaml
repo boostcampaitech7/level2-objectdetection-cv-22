@@ -1,0 +1,50 @@
+MODEL:
+  META_ARCHITECTURE: "DINOModel"
+  WEIGHTS: "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth"  # Swin-Tiny 백본 사용
+  BACKBONE:
+    NAME: "D2SwinTransformer"  # Swin Transformer 백본 사용
+    FREEZE_AT: 0
+  SWIN:
+    PRETRAIN_IMG_SIZE: 896
+    PATCH_SIZE: 4
+    IN_CHANS: 3
+    EMBED_DIM: 96  # Tiny의 기본 임베딩 크기
+    DEPTHS: [2, 2, 6, 2]  # 각 스테이지의 깊이
+    NUM_HEADS: [3, 6, 12, 24]  # 각 스테이지의 헤드 수
+    WINDOW_SIZE: 7
+    MLP_RATIO: 4.0
+    QKV_BIAS: True
+    DROP_RATE: 0.0
+    ATTN_DROP_RATE: 0.0
+    DROP_PATH_RATE: 0.2
+    APE: False
+    PATCH_NORM: True
+    OUT_INDICES: [0, 1, 2, 3]
+    FROZEN_STAGES: -1
+    USE_CHECKPOINT: False
+
+DATASETS:
+  TRAIN: ("coco_2017_train",)
+  TEST: ("coco_2017_val",)
+
+SOLVER:
+  IMS_PER_BATCH: 1  # 배치 크기 더 줄이기
+  BASE_LR: 0.00005  # 더 작은 학습률 (배치 크기가 줄어듦에 따른 조정)
+  STEPS: (184800, 246400)  # 작은 배치 크기에 따른 스텝 조정
+  MAX_ITER: 277200  # 전체 학습 반복 횟수 조정
+  WARMUP_FACTOR: 0.1  # 작은 배치에 맞춰 더 작은 Warmup Factor
+  WARMUP_ITERS: 5  # Warmup 단계도 더 축소
+  WEIGHT_DECAY: 0.0001
+
+
+INPUT:
+  MIN_SIZE_TRAIN: (320, 352, 384, 416, 448, 480)  # 이미지 크기 더 줄이기
+  MAX_SIZE_TRAIN: 896  # 최대 크기도 896으로 줄임
+  MIN_SIZE_TEST: 480  # 테스트 시 최소 크기 줄이기
+  MAX_SIZE_TEST: 896  # 테스트 시 최대 크기 줄이기
+
+DATALOADER:
+  NUM_WORKERS: 2
+
+  # Mixed Precision Training 설정
+SOLVER.AMP.ENABLED: True  # FP16 Mixed Precision 학습 활성화

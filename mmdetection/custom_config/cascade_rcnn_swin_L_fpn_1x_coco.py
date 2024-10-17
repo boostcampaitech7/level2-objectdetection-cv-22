@@ -1,4 +1,3 @@
-
 _base_ = [
     '/data/ephemeral/home/baseline/mmdetection/configs/_base_/models/cascade-rcnn_r50_fpn.py',
     '/data/ephemeral/home/baseline/mmdetection/configs/_base_/datasets/coco_detection_trash.py',
@@ -9,7 +8,6 @@ _base_ = [
 work_dir='/data/ephemeral/home/baseline/mmdetection/work_dirs/cascade_rcnn_swin_L_custom'
 
 pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth' 
-
 
 train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=20, val_interval=1)
 

@@ -37,6 +37,10 @@ class _ModelZooUrls:
         "COCO-Detection/rpn_R_50_C4_1x": "137258005/model_final_450694.pkl",
         "COCO-Detection/rpn_R_50_FPN_1x": "137258492/model_final_02ce48.pkl",
         "COCO-Detection/fast_rcnn_R_50_FPN_1x": "137635226/model_final_e5f7ce.pkl",
+        
+        "COCO-Detection/dino_R_50_FPN_3x": "190397829/model_final_5bd44e.pkl",
+        
+        "COCO-Detection/custom": "/data/ephemeral/home/baseline/detectron2/checkpoint0011_5scale_swin.pth",
         # COCO Instance Segmentation Baselines with Mask R-CNN
         "COCO-InstanceSegmentation/mask_rcnn_R_50_C4_1x": "137259246/model_final_9243eb.pkl",
         "COCO-InstanceSegmentation/mask_rcnn_R_50_DC5_1x": "137260150/model_final_4f86c3.pkl",
@@ -93,6 +97,7 @@ class _ModelZooUrls:
         "Detectron1-Comparisons/faster_rcnn_R_50_FPN_noaug_1x": "137781054/model_final_7ab50c.pkl",  # noqa
         "Detectron1-Comparisons/mask_rcnn_R_50_FPN_noaug_1x": "137781281/model_final_62ca52.pkl",  # noqa
         "Detectron1-Comparisons/keypoint_rcnn_R_50_FPN_1x": "137781195/model_final_cce136.pkl",
+        
     }
 
     @staticmethod
