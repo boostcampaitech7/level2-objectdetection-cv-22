@@ -2,6 +2,7 @@ import os
 import copy
 import torch
 import wandb
+import logging
 
 import detectron2.data.transforms as T
 from detectron2.data import detection_utils as utils
@@ -30,8 +31,6 @@ def MyMapper(dataset_dict):
     
     annos = [
         utils.transform_instance_annotations(obj, transforms, image.shape[:2])
-        #######################################################
-        # for obj in dataset_dict.pop('annotations')
         for obj in dataset_dict.pop('annotations', [])
         if obj.get('iscrowd', 0) == 0
     ]
@@ -78,6 +77,7 @@ class WandbLogger(EventWriter):
             # 모든 메트릭을 가져와서 Wandb에 로그
             metrics = {k: v.median(20) for k, v in self.trainer.storage.histories().items()}
             wandb.log(metrics)
+            #wandb.log(logging.getLogger(__name__))
 
     def set_trainer(self, trainer):
         # trainer 객체 설정

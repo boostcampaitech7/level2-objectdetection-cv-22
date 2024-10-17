@@ -1,4 +1,5 @@
 import numpy as np
+from ensemble_boxes import *
 
 from detectron2.data import detection_utils as utils
 
