@@ -16,7 +16,6 @@ def main():
         2-1. original train data를 사용할지 여부 지정
             ● -1인 경우 original 데이터 사용(validation 없음)
             ● 그 외 fold 번호(0~4) 지정
-        
     """
     fold_idx = 3
 
