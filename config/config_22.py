@@ -43,7 +43,7 @@ class Config22:
         self.kfold = 5
         self.stratified = 1  # StratifiedGroupFold 라이브러리: 0, custom: 1
 
-        self.EVAL_PERIOD = 8000
+        self.EVAL_PERIOD = 300
         self.BASE_LR = 0.001
         self.MAX_ITER = 8000
 
