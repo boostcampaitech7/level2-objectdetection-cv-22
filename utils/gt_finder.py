@@ -324,7 +324,7 @@ def main():
     categories_id_name = {cat['id']: cat['name'] for cat in annotations['categories']}
 
     # 선택할 image_id 설정
-    selected_image_id = 675 
+    selected_image_id = 1841
 
     found_image_filename = find_image_filename(selected_image_id, annotations)
 
@@ -333,9 +333,9 @@ def main():
     else:
         print(f"No image found for image_id {selected_image_id}.")
 
-    visualize_single_image(images_dir, annotations, output_dir, categories_id_name, selected_image_id)
+    #visualize_single_image(images_dir, annotations, output_dir, categories_id_name, selected_image_id)
     #visualize_detection_failed(images_dir, annotations, predictions, output_det_dir, categories_id_name)
-    #visualize_detection_failed_single_image(images_dir, annotations, predictions, output_det_dir, categories_id_name, selected_image_id)
+    visualize_detection_failed_single_image(images_dir, annotations, predictions, output_det_dir, categories_id_name, selected_image_id)
     #visualize_correct_bboxes_single_image(images_dir, annotations, predictions, output_cor_dir, categories_id_name, selected_image_id)
     visualize_correct_and_gt_bboxes(images_dir, annotations, predictions, output_both_dir, categories_id_name, selected_image_id)
 
