@@ -60,11 +60,12 @@ def main():
             ● train 데이터셋 디렉토리 경로 : dataset_dir
             ● 시각화한 이미지 저정 디렉토리 경로 : output_dir
     """
-    needToCompute = True
+    needToCompute = False
 
     train_json_path = root + '/dataset/train.json'
     val_json_path = root + '/outputs/val.bbox.json'
     output_csv_path = root + '/outputs/output_map.csv'
+    log_file_path = os.path.join(root, 'outputs', 'visualization_log.txt')
 
     dataset_dir = root + '/dataset/train/'
     output_dir = root + '/outputs/visualized_images/bad_map'
@@ -92,7 +93,7 @@ def main():
 
         results = load_json_results(val_json_path)
         annotations, images_info = load_annotations(train_json_path)
-        print(visualize_detection(results, annotations, images_info, dataset_dir, output_dir, output_csv_path))
+        print(visualize_detection(results, annotations, images_info, dataset_dir, output_dir, output_csv_path, log_file_path))
     else:
         print("프로그램 종료")
 

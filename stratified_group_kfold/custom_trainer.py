@@ -2,7 +2,6 @@ import os
 import copy
 import torch
 import wandb
-import logging
 
 import detectron2.data.transforms as T
 from detectron2.data import detection_utils as utils
