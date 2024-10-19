@@ -8,6 +8,7 @@ from stratified_group_kfold.inference.inference_detectron_fixed_fold import test
 from utils.map_computer import compute_map
 from utils.filename_reader import get_last_line_of_record
 from utils.visualizer import load_json_results, load_annotations, visualize_detection
+from utils.gt_finder import save_gt_and_detection_failure
 
 
 def main():
@@ -26,9 +27,10 @@ def main():
             ● 1 : 테스트
             ● 2 : 학습 + 테스트
             ● 3 : visualize(mAP 계산 선택)
+            ● 4 : 타겟 이미지 gt, 맞은 박스, 오탐지 박스 생성(3번 과정 선행 필요)
     """
 
-    num = 0
+    num = 4
 
     # ──────────────────────────────────────────────────────────── 0/2 : 학습 설정
 
@@ -55,7 +57,8 @@ def main():
 
             ● train 데이터 전체 json 파일 경로 : train_json_path
             ● validation 데이터 json 파일 경로 : val_json_path
-            ● mAP 데이터 csv 파일 경로 : map_file_path
+            ● mAP 데이터 csv 파일 경로(needToCompute=True시 생성) : output_csv_path
+            ● 오탐지, 오분류에 대한 바운딩 박스 크기 별 로그와 통계 저장(무족권 생성) : log_file_path
 
             ● train 데이터셋 디렉토리 경로 : dataset_dir
             ● 시각화한 이미지 저정 디렉토리 경로 : output_dir
@@ -70,9 +73,13 @@ def main():
     dataset_dir = root + '/dataset/train/'
     output_dir = root + '/outputs/visualized_images/bad_map'
     
-
-    
-
+    # ──────────────────────────────────────────────────────────── 4 : 1개 이미지 gt 시각화 설정
+    """
+        2-4. 시각화할 이미지 아이디 지정
+            ● visualization_log.txt 파일 필요 -> 3번 선행 필요
+            ● 지정한 하나의 이미지에 대한 gt와 맞은 박스 이미지, 오탐지 박스 이미지 저장
+    """
+    image_id = 172
 
     # ──────────────────────────────────────────────────────────── 실행하는 부분
 
@@ -94,6 +101,8 @@ def main():
         results = load_json_results(val_json_path)
         annotations, images_info = load_annotations(train_json_path)
         print(visualize_detection(results, annotations, images_info, dataset_dir, output_dir, output_csv_path, log_file_path))
+    elif num == 4:
+        save_gt_and_detection_failure(root, image_id)
     else:
         print("프로그램 종료")
 

@@ -306,8 +306,8 @@ def find_image_filename(image_id, annotations):
     return f"{str(image_id).zfill(4)}.jpg"
 
 
-def main():
-    root = '/data/ephemeral/home'
+def save_gt_and_detection_failure(root, id):
+    root = root
 
     images_dir = root + '/dataset/train/'  
     annotation_file = root + '/dataset/val_fold_3.json'
@@ -323,8 +323,7 @@ def main():
 
     categories_id_name = {cat['id']: cat['name'] for cat in annotations['categories']}
 
-    # 선택할 image_id 설정
-    selected_image_id = 1841
+    selected_image_id = id
 
     found_image_filename = find_image_filename(selected_image_id, annotations)
 
@@ -340,6 +339,3 @@ def main():
     visualize_correct_and_gt_bboxes(images_dir, annotations, predictions, output_both_dir, categories_id_name, selected_image_id)
 
 
-
-if __name__ == "__main__":
-    main()
