@@ -11,8 +11,8 @@ import json
 
 path_dataset = '/data/ephemeral/home/dataset/'
 
-input_json = path_dataset + 'train_fold_3.json'
-output_json = path_dataset + 'train_fold_3_.json'
+input_json = path_dataset + 'val_fold_3.json'
+output_json = path_dataset + 'val_fold_3_.json'
 
 # ──────────────────────────────────────────────────────────────────
 
