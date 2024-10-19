@@ -49,7 +49,12 @@ def iou(box1, box2):
     return inter_area / union_area
 
 
-def visualize_detection(results, annotations, images_info, dataset_dir, category_names, output_dir, map_file_path):
+def visualize_detection(results, annotations, images_info, dataset_dir, output_dir, map_file_path, log_file_path):
+    
+    category_names = {0: 'General trash', 1: 'Paper', 2: 'Paper pack', 3: 'Metal', 
+                  4: 'Glass', 5: 'Plastic', 6: 'Styrofoam', 7: 'Plastic bag', 
+                  8: 'Battery', 9: 'Clothing'}
+    
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -66,107 +71,97 @@ def visualize_detection(results, annotations, images_info, dataset_dir, category
 
     image_id_to_filename = {image['id']: image['file_name'] for image in images_info}
 
-    for image_id, result_list in grouped_results.items():
-        image_file_name = image_id_to_filename.get(image_id, None)
+    
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Missed Bboxes (Image ID, Bbox ID, Category ID):\n")
 
-        if image_file_name is None:
-            print(f"{image_id} 이미지 없음")
-            continue
-        
-        image_file_name = f"{str(image_id).zfill(4)}.jpg"
-        image_path = os.path.join(dataset_dir, image_file_name)
+        for image_id, result_list in grouped_results.items():
+            image_file_name = image_id_to_filename.get(image_id, None)
 
-        if not os.path.exists(image_path):
-            print(f"{image_file_name} 파일 없음")
-            continue
+            if image_file_name is None:
+                print(f"{image_id} 이미지 없음")
+                continue
 
-        image = Image.open(image_path)
+            image_file_name = f"{str(image_id).zfill(4)}.jpg"
+            image_path = os.path.join(dataset_dir, image_file_name)
 
-        fig, ax = plt.subplots(1)
-        ax.imshow(image)
+            if not os.path.exists(image_path):
+                print(f"{image_file_name} 파일 없음")
+                continue
 
-        # Ground Truth(파랑)
-        ground_truth_boxes = []
-        if image_id in grouped_annotations:
-            map_value = map_values.get(image_id, None)
+            image = Image.open(image_path)
 
-            for annotation in grouped_annotations[image_id]:
-                bbox = annotation["bbox"]
-                category_id = annotation["category_id"]
+            fig, ax = plt.subplots(1)
+            ax.imshow(image)
+
+            # Ground Truth(파랑)
+            ground_truth_boxes = []
+            if image_id in grouped_annotations:
+                map_value = map_values.get(image_id, None)
+
+                for annotation in grouped_annotations[image_id]:
+                    bbox = annotation["bbox"]
+                    category_id = annotation["category_id"]
+                    
+                    x_min, y_min, width, height = bbox
+                    ground_truth_boxes.append((bbox, category_id))
+
+                    rect = patches.Rectangle((x_min, y_min), width, height, linewidth=2, edgecolor='b', facecolor='none', linestyle='--', label="Ground Truth")
+                    ax.add_patch(rect)
+
+                    label = f"{category_names[category_id]}"
+                    plt.text(x_min + width, y_min, label, color='white', backgroundcolor='blue', fontsize=6, alpha=0.8)
+
+            # 예측 바운딩 박스(빨강)
+            for result in result_list:
+                pred_bbox = result["bbox"]
+                score = result["score"]
+                pred_category_id = result["category_id"]
                 
-                x_min, y_min, width, height = bbox
-                ground_truth_boxes.append((bbox, category_id))
-
-                rect = patches.Rectangle((x_min, y_min), width, height, linewidth=2, edgecolor='b', facecolor='none', linestyle='--', label="Ground Truth")
+                x_min, y_min, width, height = pred_bbox
+                rect = patches.Rectangle((x_min, y_min), width, height, linewidth=2, edgecolor='r', facecolor='none', label="Prediction")
                 ax.add_patch(rect)
 
-                label = f"{category_names[category_id]}"
-                plt.text(x_min + width, y_min, label, color='white', backgroundcolor='blue', fontsize=6, alpha=0.8)
+                label = f"{category_names[pred_category_id]}: {score:.2f}"
+                plt.text(x_min, y_min - 5, label, color='white', backgroundcolor='red', fontsize=6, alpha=0.8)
 
-        # 예측 바운딩 박스(빨강)
-        for result in result_list:
-            pred_bbox = result["bbox"]
-            score = result["score"]
-            pred_category_id = result["category_id"]
-            
-            x_min, y_min, width, height = pred_bbox
-            rect = patches.Rectangle((x_min, y_min), width, height, linewidth=2, edgecolor='r', facecolor='none', label="Prediction")
-            ax.add_patch(rect)
+                # 탐지 및 분류 실패 판단
+                detection_failure = True
+                classification_failure = False
 
-            label = f"{category_names[pred_category_id]}: {score:.2f}"
-            plt.text(x_min, y_min - 5, label, color='white', backgroundcolor='red', fontsize=6, alpha=0.8)
+                for gt_bbox, gt_category_id in ground_truth_boxes:
+                    iou_value = iou(pred_bbox, gt_bbox)
 
-            # 탐지 및 분류 실패 판단
-            detection_failure = True
-            classification_failure = False
+                    if iou_value >= 0.5:
+                        detection_failure = False
+                        if pred_category_id != gt_category_id:
+                            classification_failure = True
+                        break
 
-            for gt_bbox, gt_category_id in ground_truth_boxes:
-                iou_value = iou(pred_bbox, gt_bbox)
+                # 실패 기록 및 이미지에 텍스트 추가
+                if detection_failure:
+                    plt.text(x_min, y_min + height, 'detection failed', color='white', backgroundcolor='pink', fontsize=6, alpha=0.8)
+                    log_file.write(f"{image_id}, {result['id']}, {pred_category_id} (Detection Failed)\n")
+                    
+                elif classification_failure:
+                    plt.text(x_min + 10, y_min + height, 'classification failed', color='white', backgroundcolor='orange', fontsize=6, alpha=0.8)
+                    log_file.write(f"{image_id}, {result['id']}, {pred_category_id} (Classification Failed)\n")
 
-                if iou_value >= 0.5:
-                    detection_failure = False
-                    if pred_category_id != gt_category_id:
-                        classification_failure = True
-                    break
-
-
-            if detection_failure:
-                plt.text(x_min, y_min + height, 'detection failed', color='white', backgroundcolor='pink', fontsize=6, alpha=0.8)
-            elif classification_failure:
-                plt.text(x_min + 10, y_min + height, 'classification failed', color='white', backgroundcolor='orange', fontsize=6, alpha=0.8)
-
-
-            if map_value is not None:
+                if map_value is not None:
                     map_label = f"mAP: {map_value:.2f}"
                     plt.text(10, 10, map_label, color='white', backgroundcolor='green', fontsize=10)
-                
 
-        if map_value is not None and map_value < 0.5:
-            output_path = os.path.join(output_dir, f"{image_id}_detection.jpg")
-            plt.axis("off")
-            plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
-            plt.close(fig)
-            count += 1
-            print(f"{output_path}에 저장됨")
+
+            if map_value is not None and map_value < 0.5:
+                output_path = os.path.join(output_dir, f"{image_id}_detection.jpg")
+                plt.axis("off")
+                plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+                plt.close(fig)
+                count += 1
+                print(f"{output_path}에 저장됨")
+
+
+        log_file.write(f"\nTotal missed bboxes: {count}\n")
 
     return count
 
-
-train_json_path = '/data/ephemeral/home/dataset/train.json'
-
-dataset_dir = '/data/ephemeral/home/dataset/train/'
-
-json_path = '/data/ephemeral/home/outputs/val.bbox.json'
-
-map_file_path = '/data/ephemeral/home/outputs/output_map.csv'
-
-category_names = {0: 'General trash', 1: 'Paper', 2: 'Paper pack', 3: 'Metal', 
-                  4: 'Glass', 5: 'Plastic', 6: 'Styrofoam', 7: 'Plastic bag', 
-                  8: 'Battery', 9: 'Clothing'}
-
-output_dir = '/data/ephemeral/home/outputs/visualized_images/bad_map'
-
-results = load_json_results(json_path)
-annotations, images_info = load_annotations(train_json_path)
-
-print(visualize_detection(results, annotations, images_info, dataset_dir, category_names, output_dir, map_file_path))

@@ -1,11 +1,11 @@
-def get_last_line_of_record(filename=''):
+def get_last_line_of_record(root, filename=''):
     """
     filename이 빈 문자열인 경우, record.txt에서 마지막 줄을 읽어 반환.
     그렇지 않은 경우에는 아무 작업도 하지 않음.
     """
     if filename == '':
         try:
-            with open("/data/ephemeral/home/outputs/record.txt", "r") as f:
+            with open(root + "/outputs/record.txt", "r") as f:
                 lines = f.readlines()
                 if lines:
                     return lines[-1].strip()
