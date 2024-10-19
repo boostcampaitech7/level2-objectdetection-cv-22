@@ -245,6 +245,62 @@ def visualize_correct_bboxes_single_image(images_dir, annotations, predictions, 
 
 
 
+def visualize_correct_and_gt_bboxes(images_dir, annotations, predictions, output_dir, categories_id_name, selected_image_id, iou_threshold=0.5):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    image_filename = f"{str(selected_image_id).zfill(4)}.jpg"
+    image_path = os.path.join(images_dir, image_filename)
+
+    if not os.path.exists(image_path):
+        print(f"Image {image_filename} not found in {images_dir}.")
+        return
+
+    pred_list = [pred for pred in predictions if pred['image_id'] == selected_image_id]
+    gt_annotations = [ann for ann in annotations['annotations'] if ann['image_id'] == selected_image_id]
+
+    image = Image.open(image_path)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.imshow(image)
+    ax.axis('off')
+
+    correct_bbox_count = 0 
+    total_gt_count = len(gt_annotations)
+
+    # Ground Truth 바운딩 박스 그리기 (파란색)
+    for gt_ann in gt_annotations:
+        gt_bbox = gt_ann['bbox']
+        gt_category_id = gt_ann['category_id']
+        label = f"{categories_id_name.get(gt_category_id, 'Unknown')} (GT)"
+        draw_bbox(ax, gt_bbox, label, color='blue')
+
+    # 예측 바운딩 박스 그리기 및 정답 여부 확인
+    for pred in pred_list:
+        pred_bbox = pred['bbox']
+        pred_category_id = pred['category_id']
+        pred_score = pred['score']
+
+        for gt_ann in gt_annotations:
+            gt_bbox = gt_ann['bbox']
+            gt_category_id = gt_ann['category_id']
+
+            iou = calculate_iou(gt_bbox, pred_bbox)
+            if iou >= iou_threshold and pred_category_id == gt_category_id:
+                
+                label = f"{categories_id_name.get(pred_category_id, 'Unknown')}: {pred_score:.2f}"
+                draw_bbox(ax, pred_bbox, label, color='green')
+                correct_bbox_count += 1 
+                break
+
+    output_image_path = os.path.join(output_dir, f"{os.path.splitext(image_filename)[0]}_correct_and_gt.jpg")
+    plt.savefig(output_image_path, bbox_inches='tight', pad_inches=0)
+    plt.close()
+    
+    print(f"Saved: {output_image_path}")
+    print(f"GT bounding boxes: {total_gt_count}")
+    print(f"Correct bounding boxes: {correct_bbox_count}")
+
+
 def find_image_filename(image_id, annotations):
     """Find image filename using image_id from annotations."""
     return f"{str(image_id).zfill(4)}.jpg"
@@ -260,6 +316,7 @@ def main():
     output_dir = root + '/outputs/ground_truth'
     output_det_dir = root + '/outputs/detection_failed'
     output_cor_dir = root + '/outputs/correct_bboxes'
+    output_both_dir = root + '/outputs/correct_and_gt_bboxes'
 
     annotations = load_annotations(annotation_file)
     predictions = load_annotations(prediction_file)
@@ -267,7 +324,7 @@ def main():
     categories_id_name = {cat['id']: cat['name'] for cat in annotations['categories']}
 
     # 선택할 image_id 설정
-    selected_image_id = 675  
+    selected_image_id = 675 
 
     found_image_filename = find_image_filename(selected_image_id, annotations)
 
@@ -278,8 +335,10 @@ def main():
 
     visualize_single_image(images_dir, annotations, output_dir, categories_id_name, selected_image_id)
     #visualize_detection_failed(images_dir, annotations, predictions, output_det_dir, categories_id_name)
-    visualize_detection_failed_single_image(images_dir, annotations, predictions, output_det_dir, categories_id_name, selected_image_id)
-    visualize_correct_bboxes_single_image(images_dir, annotations, predictions, output_cor_dir, categories_id_name, selected_image_id)
+    #visualize_detection_failed_single_image(images_dir, annotations, predictions, output_det_dir, categories_id_name, selected_image_id)
+    #visualize_correct_bboxes_single_image(images_dir, annotations, predictions, output_cor_dir, categories_id_name, selected_image_id)
+    visualize_correct_and_gt_bboxes(images_dir, annotations, predictions, output_both_dir, categories_id_name, selected_image_id)
+
 
 
 if __name__ == "__main__":
