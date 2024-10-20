@@ -9,6 +9,7 @@ from utils.map_computer import compute_map
 from utils.filename_reader import get_last_line_of_record
 from utils.visualizer import load_json_results, load_annotations, visualize_detection
 from utils.gt_finder import save_gt_and_detection_failure
+from utils.map_computer_all import analyze_val_results
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
             ● 2 : 학습 + 테스트
             ● 3 : visualize(mAP 계산 선택)
             ● 4 : 타겟 이미지 gt, 맞은 박스, 오탐지 박스 생성(3번 과정 선행 필요)
+            ● 5 : 전체 map 계산(validation에 대한 json 파일 필요)
     """
 
     num = 4
@@ -76,10 +78,34 @@ def main():
     # ──────────────────────────────────────────────────────────── 4 : 1개 이미지 gt 시각화 설정
     """
         2-4. 시각화할 이미지 아이디 지정
-            ● visualization_log.txt 파일 필요 -> 3번 선행 필요
-            ● 지정한 하나의 이미지에 대한 gt와 맞은 박스 이미지, 오탐지 박스 이미지 저장
+            ● 필요한 파일
+                - visualization_log.txt 파일 요구 -> 3번 선행 필요
+            ● 생성되는 파일
+                - /outputs/detection_failed/0000_detextion_failed.jpg
+                - /outputs/correct_and_gt_bboxes/0000_correct_and_gt.jpg
+
+            ● 추가 기능 : gt_finder.py 파일 내 
+                - visualize_single_image 함수 주석 제거 시 /outputs/ground_truth/0000_gt.jpg 생성(gt만 확인하는 이미지)
+                - visualize_correct_bboxes_single_image 함수 주석 제거 시 /outputs/correct_bboxes.0000_correct_bboxes.jpg 생성(correct만 확인하는 이미지)
     """
     image_id = 172
+
+    # ──────────────────────────────────────────────────────────── 4 : 1개 이미지 gt 시각화 설정
+    """
+        2-5. validation.json 파일을 이용한 전체 mAP 계산
+            ● 필요한 파일
+                - validation에 사용된 annotation 파일 지정: gt_file
+                - validation에 대한 json파일 지정 : pred_file
+            ● 생성되는 파일
+                - AP와 AR, 클래스별 최종 mAP 값이 저장되는 텍스트 파일 : output_file
+    """
+
+    # 필요한 파일
+    gt_file = root + '/dataset/val_fold_3.json'
+    pred_file = root + '/outputs/val.bbox.json'
+
+    # 생성될 파일
+    output_file = root + '/outputs/val_analysis.txt'
 
     # ──────────────────────────────────────────────────────────── 실행하는 부분
 
@@ -103,6 +129,8 @@ def main():
         print(visualize_detection(results, annotations, images_info, dataset_dir, output_dir, output_csv_path, log_file_path))
     elif num == 4:
         save_gt_and_detection_failure(root, image_id)
+    elif num == 5:
+        analyze_val_results(gt_file, pred_file, output_file)
     else:
         print("프로그램 종료")
 

@@ -333,7 +333,6 @@ def save_gt_and_detection_failure(root, id):
         print(f"No image found for image_id {selected_image_id}.")
 
     #visualize_single_image(images_dir, annotations, output_dir, categories_id_name, selected_image_id)
-    #visualize_detection_failed(images_dir, annotations, predictions, output_det_dir, categories_id_name)
     visualize_detection_failed_single_image(images_dir, annotations, predictions, output_det_dir, categories_id_name, selected_image_id)
     #visualize_correct_bboxes_single_image(images_dir, annotations, predictions, output_cor_dir, categories_id_name, selected_image_id)
     visualize_correct_and_gt_bboxes(images_dir, annotations, predictions, output_both_dir, categories_id_name, selected_image_id)

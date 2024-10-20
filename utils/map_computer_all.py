@@ -45,10 +45,4 @@ def analyze_val_results(gt_file, pred_file, output_file):
 
     print(f"Results saved in {output_file}")
 
-root = '/data/ephemeral/home'
-gt_file = root + '/dataset/val_fold_3.json'
-pred_file = root + '/outputs/val.bbox.json'
-output_file = root + '/outputs/val_analysis.txt'
-
-analyze_val_results(gt_file, pred_file, output_file)
 
