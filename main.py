@@ -71,6 +71,7 @@ def main():
     val_json_path = root + '/outputs/val.bbox.json'
     output_csv_path = root + '/outputs/output_map.csv'
     log_file_path = os.path.join(root, 'outputs', 'visualization_log.txt')
+    log_stats_path = os.path.join(root, 'outputs', 'log_stats.txt')
 
     dataset_dir = root + '/dataset/train/'
     output_dir = root + '/outputs/visualized_images/bad_map'
@@ -126,7 +127,7 @@ def main():
 
         results = load_json_results(val_json_path)
         annotations, images_info = load_annotations(train_json_path)
-        print(visualize_detection(results, annotations, images_info, dataset_dir, output_dir, output_csv_path, log_file_path))
+        print(visualize_detection(results, annotations, images_info, dataset_dir, output_dir, output_csv_path, log_file_path, log_stats_path))
     elif num == 4:
         save_gt_and_detection_failure(root, image_id)
     elif num == 5:

@@ -49,7 +49,7 @@ def iou(box1, box2):
     return inter_area / union_area
 
 
-def visualize_detection(results, annotations, images_info, dataset_dir, output_dir, map_file_path, log_file_path):
+def visualize_detection(results, annotations, images_info, dataset_dir, output_dir, map_file_path, log_file_path, log_stats_path):
     
     category_names = {0: 'General trash', 1: 'Paper', 2: 'Paper pack', 3: 'Metal', 
                       4: 'Glass', 5: 'Plastic', 6: 'Styrofoam', 7: 'Plastic bag', 
@@ -179,7 +179,9 @@ def visualize_detection(results, annotations, images_info, dataset_dir, output_d
                 count += 1
                 print(f"{output_path}에 저장됨")
 
-        # 실패 개수 출력
+       
+    # 실패 개수 출력
+    with open(log_stats_path, 'w') as log_file:
         log_file.write("\nGT Category별 실패 개수:\n")
         log_file.write("GT Category ID, Detection Failed (S, M, L), Classification Failed (S, M, L)\n")
         for gt_category_id in detection_failed_count.keys():
@@ -187,6 +189,7 @@ def visualize_detection(results, annotations, images_info, dataset_dir, output_d
             log_file.write(f"{classification_failed_count[gt_category_id]['S']}, {classification_failed_count[gt_category_id]['M']}, {classification_failed_count[gt_category_id]['L']}\n")
 
         log_file.write(f"\nTotal missed bboxes: {count}\n")
+
 
     return count
 
