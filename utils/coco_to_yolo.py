@@ -63,8 +63,8 @@ def get_images_info(data):
     return images_info
 
 
-json_path = '/data/ephemeral/home/dataset/train.json'  
-output_dir = '/data/ephemeral/home/dataset/yolo'
+json_path = '/data/ephemeral/home/dataset/val_fold_3.json'  
+output_dir = '/data/ephemeral/home/dataset/yolo_val_3'
 
 with open(json_path, 'r') as f:
     data = json.load(f)
