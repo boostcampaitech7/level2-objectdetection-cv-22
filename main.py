@@ -32,7 +32,7 @@ def main():
             ● 5 : 전체 map 계산(validation에 대한 json 파일 필요)
     """
 
-    num = 4
+    num = 1
 
     # ──────────────────────────────────────────────────────────── 0/2 : 학습 설정
 
@@ -49,7 +49,7 @@ def main():
             ● 넣지 않으면 맨 마지막 실행한 train에 대한 inference 진행
             ● visualization 여부 설정
     """
-    inference_name = ''
+    inference_name = '[10-20-1659]faster_rcnn_R_101_FPN_3xfold_3'
     visualized = False
     
     # ──────────────────────────────────────────────────────────── 3 : visualize 설정
@@ -65,10 +65,11 @@ def main():
             ● train 데이터셋 디렉토리 경로 : dataset_dir
             ● 시각화한 이미지 저정 디렉토리 경로 : output_dir
     """
-    needToCompute = False
+    needToCompute = True
 
     train_json_path = root + '/dataset/train.json'
-    val_json_path = root + '/outputs/val.bbox.json'
+    val_json_path = root + '/outputs/val.pafpn.json'
+    
     output_csv_path = root + '/outputs/output_map.csv'
     log_file_path = os.path.join(root, 'outputs', 'visualization_log.txt')
     log_stats_path = os.path.join(root, 'outputs', 'log_stats.txt')
@@ -89,9 +90,9 @@ def main():
                 - visualize_single_image 함수 주석 제거 시 /outputs/ground_truth/0000_gt.jpg 생성(gt만 확인하는 이미지)
                 - visualize_correct_bboxes_single_image 함수 주석 제거 시 /outputs/correct_bboxes.0000_correct_bboxes.jpg 생성(correct만 확인하는 이미지)
     """
-    image_id = 172
+    image_id = 493
 
-    # ──────────────────────────────────────────────────────────── 4 : 1개 이미지 gt 시각화 설정
+    # ──────────────────────────────────────────────────────────── 5 : 전체 mAP 계산
     """
         2-5. validation.json 파일을 이용한 전체 mAP 계산
             ● 필요한 파일
@@ -103,7 +104,7 @@ def main():
 
     # 필요한 파일
     gt_file = root + '/dataset/val_fold_3.json'
-    pred_file = root + '/outputs/val.bbox.json'
+    pred_file = root + '/outputs/val.pafpn.json'
 
     # 생성될 파일
     output_file = root + '/outputs/val_analysis.txt'
@@ -115,11 +116,13 @@ def main():
     if num == 0:
         train_model(mycfg, fold_idx=fold_idx)
     elif num == 1:
-        get_last_line_of_record(root, inference_name)
+        inference_name = get_last_line_of_record(root, inference_name)
+        print("inference 파일 경로: ", inference_name)
         test_model(mycfg, visualized=visualized, filename=inference_name)
     elif num == 2:
         train_model(mycfg, fold_idx=fold_idx)
-        get_last_line_of_record(root, inference_name)
+        inference_name = get_last_line_of_record(root, inference_name)
+        print("inference 파일 경로: ", inference_name)
         test_model(mycfg, visualized=visualized, filename='')
     elif num == 3:
         if needToCompute:

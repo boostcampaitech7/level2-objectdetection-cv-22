@@ -100,7 +100,7 @@ def train_model(con22, fold_idx=-1):
     train_name, val_name, data_size = register_datasets(con22, fold_idx)
 
     cfg = set_cfg(con22)
-    title = f'[{datetime.now().strftime("%m/%d-%H%M")}]{con22.model_name}'
+    title = f'[{datetime.now().strftime("%m-%d-%H%M")}]{con22.model_name}'
     path_output_this = con22.path_output + title
     log_executions(con22.path_output, title)
 
