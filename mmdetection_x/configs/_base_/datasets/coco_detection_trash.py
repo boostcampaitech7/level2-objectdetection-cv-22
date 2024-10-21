@@ -54,11 +54,11 @@ data = dict(
     val=dict(
         type=dataset_type,
         ann_file=data_root + 'annotations/instances_val2017.json',
-        img_prefix=root + 'train.json'
+        img_prefix=root + 'train.json',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         ann_file=data_root + 'annotations/instances_val2017.json',
-        img_prefix=root + 'test.json'
+        img_prefix=root + 'test.json',
         pipeline=test_pipeline))
 evaluation = dict(interval=1, metric='bbox')
