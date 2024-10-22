@@ -43,9 +43,9 @@ class Config22:
         self.kfold = 5
         self.stratified = 1  # StratifiedGroupFold 라이브러리: 0, custom: 1
 
-        self.EVAL_PERIOD = 300
+        self.EVAL_PERIOD = 500
         self.BASE_LR = 0.001
-        self.MAX_ITER = 8000
+        self.MAX_ITER = 20000
 
         # ───────────────────────────── 추론 설정 ─────────────────────────────
         self.ensemble = 'mean'  # 평균: 'mean' / 다수결: 'major'

@@ -21,7 +21,6 @@ def main():
         root = '/data/ephemeral/home'
 
     os.makedirs(root + '/outputs', exist_ok=True)
-
     """
         1. 실행할 파일 번호: 
             ● 0 : 학습 
@@ -32,7 +31,7 @@ def main():
             ● 5 : 전체 map 계산(validation에 대한 json 파일 필요)
     """
 
-    num = 1
+    num = 2
 
     # ──────────────────────────────────────────────────────────── 0/2 : 학습 설정
 
@@ -49,7 +48,7 @@ def main():
             ● 넣지 않으면 맨 마지막 실행한 train에 대한 inference 진행
             ● visualization 여부 설정
     """
-    inference_name = '[10-20-1659]faster_rcnn_R_101_FPN_3xfold_3'
+    inference_name = ''
     visualized = False
     
     # ──────────────────────────────────────────────────────────── 3 : visualize 설정
@@ -123,7 +122,7 @@ def main():
         train_model(mycfg, fold_idx=fold_idx)
         inference_name = get_last_line_of_record(root, inference_name)
         print("inference 파일 경로: ", inference_name)
-        test_model(mycfg, visualized=visualized, filename='')
+        test_model(mycfg, visualized=visualized, filename=inference_name)
     elif num == 3:
         if needToCompute:
             compute_map(train_json_path, val_json_path, output_csv_path)

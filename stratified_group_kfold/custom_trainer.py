@@ -1,6 +1,7 @@
 import os
 import copy
 import torch
+import torch.nn as nn
 import wandb
 import random
 
@@ -12,7 +13,7 @@ from detectron2.evaluation import COCOEvaluator
 from detectron2.utils.events import EventWriter
 from detectron2.engine import hooks
 
-from random_paste import RandomPaste, RandomPasteTransform
+#from random_paste import RandomPaste, RandomPasteTransform
 
 def MyMapper(dataset_dict):
     dataset_dict = copy.deepcopy(dataset_dict)
@@ -23,9 +24,9 @@ def MyMapper(dataset_dict):
     #T.RandomBrightness(0.8, 1.8),
     #T.RandomContrast(0.6, 1.3),
     #T.RandomRotation(angle=[-15, 15]),
-    T.RandomCrop(crop_type="relative_range", crop_size=(0.5, 0.5)),
+    #T.RandomCrop(crop_type="relative_range", crop_size=(random.uniform(0.5, 0.9), random.uniform(0.5, 0.9))),
     #T.RandomLighting(0.1),
-    #T.ResizeShortestEdge(short_edge_length=(1200, 1600), max_size=2048),
+    T.ResizeShortestEdge(short_edge_length=(1200, 1600), max_size=2048),
     ]
 
     image, transforms = T.apply_transform_gens(transform_list, image)
@@ -42,6 +43,20 @@ def MyMapper(dataset_dict):
     dataset_dict['instances'] = utils.filter_empty_instances(instances)
     
     return dataset_dict
+
+
+def weighted_loss(pred_boxes, target_boxes):
+    
+    smooth_l1_loss = nn.SmoothL1Loss()
+    loss = smooth_l1_loss(pred_boxes, target_boxes)
+    
+    # 작은 박스에 대해 가중치 부여
+    box_widths = target_boxes[:, 2] - target_boxes[:, 0]
+    weights = 1.0 / box_widths
+
+    # 가중치를 각 손실 값에 적용
+    weighted_loss = loss * weights.unsqueeze(1)
+    return weighted_loss.mean()
 
 
 def extract_random_patch(image, bbox):
@@ -112,8 +127,8 @@ class MyTrainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
-        #return build_detection_train_loader(cfg, mapper=MyMapper)
-        return build_detection_train_loader(cfg)
+        return build_detection_train_loader(cfg, mapper=MyMapper)
+        #return build_detection_train_loader(cfg)
     
     @classmethod
     def build_evaluator(cls, cfg, dataset_name, output_folder=None):

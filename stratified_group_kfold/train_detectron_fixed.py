@@ -72,8 +72,8 @@ def set_cfg(con22):
     cfg.SOLVER.IMS_PER_BATCH = con22.SOLVER_IMS_PER_BATCH
     cfg.SOLVER.BASE_LR = con22.BASE_LR
     cfg.SOLVER.MAX_ITER = con22.MAX_ITER
-    cfg.SOLVER.STEPS = (cfg.SOLVER.MAX_ITER // 2, 
-                        cfg.SOLVER.MAX_ITER * 2 //3)
+    cfg.SOLVER.STEPS = (cfg.SOLVER.MAX_ITER * 0.5, 
+                        cfg.SOLVER.MAX_ITER * 0.75)
 
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = con22.ROI_HEADS_BATCH_SIZE_PER_IMAGE
     cfg.MODEL.DEVICE = "cuda"
@@ -87,7 +87,7 @@ def set_cfg(con22):
     # cfg.MODEL.RPN.IN_FEATURES = ["p2", "p3", "p4", "p5", "p6"]
 
 
-    # cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32, 64, 128, 256, 512]]
+    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32, 64, 128, 256, 512, 1024]]
     # cfg.MODEL.ANCHOR_GENERATOR.OFFSET = 0.5
 
     return cfg
@@ -102,7 +102,7 @@ def train_model(con22, fold_idx=-1):
     cfg = set_cfg(con22)
     title = f'[{datetime.now().strftime("%m-%d-%H%M")}]{con22.model_name}'
     path_output_this = con22.path_output + title
-    log_executions(con22.path_output, title)
+    log_executions(con22.path_output, title+con22.filename_fold_output+str(fold_idx))
 
     cfg.OUTPUT_DIR = f'{path_output_this}{con22.filename_fold_output}{fold_idx}'
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)

@@ -10,8 +10,11 @@ def get_last_line_of_record(root, filename=''):
                 if lines:
                     return lines[-1].strip()
                 else:
-                    return "record.txt 파일이 비어 있습니다."
+                    print("record.txt 파일이 비어 있습니다.")
+                    return filename
         except FileNotFoundError:
-            return "record.txt 파일이 존재하지 않습니다."
+            print("record.txt 파일이 존재하지 않습니다.")
+            return filename
     else:
-        return "filename이 빈 문자열이 아닙니다."
+        print("filename이 빈 문자열이 아닙니다.")
+        return filename
