@@ -36,7 +36,7 @@ class Config22:
         self.BACKBONE_NAME = ''
         self.ROI_HEADS_BATCH_SIZE_PER_IMAGE = 128  # Default : 128
         self.ROI_HEADS_NUM_CLASSES = 10
-        self.RPN_NMS_THRESH = 0.5  # Default : 0.7
+        self.RPN_NMS_THRESH = 0.7  # Default : 0.7
 
         # ───────────────────────────── 학습 설정 ─────────────────────────────
         # /data/ephemeral/home/repo/stratified_group_kfold/train_detectron_fixed.py 관련

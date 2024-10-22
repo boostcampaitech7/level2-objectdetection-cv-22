@@ -87,7 +87,7 @@ def set_cfg(con22):
     # cfg.MODEL.RPN.IN_FEATURES = ["p2", "p3", "p4", "p5", "p6"]
 
 
-    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32, 64, 128, 256, 512, 1024]]
+    cfg.MODEL.ANCHOR_GENERATOR.SIZES = [[32, 64, 128, 256, 512]]
     # cfg.MODEL.ANCHOR_GENERATOR.OFFSET = 0.5
 
     return cfg
