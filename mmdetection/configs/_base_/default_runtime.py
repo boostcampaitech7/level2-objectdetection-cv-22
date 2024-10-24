@@ -19,8 +19,6 @@ visualizer = dict(
     type='DetLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 
-
-
 log_level = 'INFO'
 load_from = None
 resume = False
