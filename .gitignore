@@ -1,0 +1,27 @@
+# 일반적인 시스템 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.swp
+
+# 빌드 디렉토리
+/build/
+/dist/
+
+# Python 관련
+__pycache__/
+*.py[cod]
+
+# Node.js 관련
+node_modules/
+
+# 환경 설정 파일
+.env
+
+# CSV 파일
+*.csv
