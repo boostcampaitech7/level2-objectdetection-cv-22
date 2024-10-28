@@ -16,7 +16,7 @@ from detectron2.data import build_detection_test_loader
 
 # 개인화
 # export PYTHONPATH=$PYTHONPATH:/data/ephemeral/home/repo/stratified_group_kfold/inference
-from config.config_22 import Config22
+from detectron2.config_22 import Config22
 from inference_ensemble import ensemble_predictions
 from inference_utils import MyMapper
 

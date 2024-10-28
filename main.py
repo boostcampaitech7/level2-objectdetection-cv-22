@@ -1,9 +1,9 @@
 import os
 import platform
 
-from config.config_22 import Config22
-from stratified_group_kfold.train_detectron_fixed import train_model
-from stratified_group_kfold.inference.inference_detectron_fixed_fold import test_model
+from detectron2.config_22 import Config22
+from detectron2.train_detectron_fixed import train_model
+from detectron2.inference.inference_detectron_fixed_fold import test_model
 
 from utils.map_computer import compute_map
 from utils.filename_reader import get_last_line_of_record

@@ -5,7 +5,7 @@ setup_logger()
 # 학습용
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
-from stratified_group_kfold.custom_trainer import MyTrainer
+from detectron2.custom_trainer import MyTrainer
 
 # 데이터 로딩
 from detectron2.data import MetadataCatalog, DatasetCatalog

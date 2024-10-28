@@ -16,7 +16,7 @@ from detectron2.utils.visualizer import Visualizer
 import cv2
 
 # 개인화
-from stratified_group_kfold.inference.inference_utils import MyMapper
+from detectron2.inference.inference_utils import MyMapper
 
 """
     고정된 1개의 파일만 inference

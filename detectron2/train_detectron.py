@@ -13,13 +13,13 @@ from sklearn.model_selection import StratifiedGroupKFold
 # 데이터 로딩
 from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
-from stratified_kfold import stratified_group_k_fold, save_fold_data
+from utils.stratified_kfold import stratified_group_k_fold, save_fold_data
 
 import sys
 sys.path.append('/data/ephemeral/home/repo')
 
 # 개인화
-from config.config_22 import Config22
+from detectron2.config_22 import Config22
 from datetime import datetime
 import wandb
 
