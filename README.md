@@ -63,7 +63,7 @@
 
 ### Modeling Result
 
-| **Model** | **리더보드 mAP@50** |
+| **Model** | **mAP@50 (Private)** |
 | --- | --- |
 | NMS_Ensemble (DINO) | **0.7142** |
 | WBF_Ensemble (모든 모델) | 0.6185 |
