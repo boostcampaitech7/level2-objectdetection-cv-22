@@ -90,7 +90,7 @@ def save_fold_data(data, train_idx, val_idx, fold_idx, path_dataset):
         if img_id not in [img['id'] for img in val_data['images']]:
             val_data['images'].append(image_id_map[img_id])
 
-    # 각 fold 데이터 저장
+    # 각 fold 데이터 저장 
     train_json = os.path.join(path_dataset, f'{Config22.filename_fold_train}{fold_idx}.json')
     val_json = os.path.join(path_dataset, f'{Config22.filename_fold_val}{fold_idx}.json')
     
