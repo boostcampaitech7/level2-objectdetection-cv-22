@@ -27,7 +27,7 @@
 ### MEMBERS
 
 | <img src="https://github.com/user-attachments/assets/24d0bd6b-0742-486e-990a-9570e62096e5" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/5295a4ad-e426-4cd8-8bef-c64b53bccc4c" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/d30e8cae-a3ea-41cf-8947-0410776394f9" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/8a1d8b6a-f243-4b41-877d-78a48e6fde0f" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/864a519a-10ea-4f2a-b020-0f20b893f01a" width="200" height="200"/> |
-| --- | --- | --- | --- | --- |
+| :---: | :---: | :---: | :---: | :---: |
 | [김예진](https://github.com/yeyechu) | [배형준](https://github.com/BaeHyungJoon) | [송재현](https://github.com/mongsam2) | [이재효](https://github.com/jxxhyo) | [차성연](https://github.com/MICHAA4) |
 
 ### Project Objective and Direction
@@ -46,9 +46,9 @@
 
 ## 3. Data EDA
 
-<p align="center">
-<img width="1276" alt="image" src="https://github.com/user-attachments/assets/f381290c-ae9b-4c57-bb00-5e642f079068 width="90%" height="90%"/>
-</p>
+
+<img width="800" alt="result" src="https://github.com/user-attachments/assets/45327f7d-41fb-439d-b456-996c37221875">
+
 
 - 카테고리별 수와 BBox 면적별 수를 확인함으로써 데이터가 상당히 불균형하다는 것을 알 수 있었다
 - BBox 크기는 상당히 넓은 범위에 걸쳐 분포하고 비율은 대부분 4를 넘지 않는 것을 확인하였다
