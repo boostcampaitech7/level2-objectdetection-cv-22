@@ -26,7 +26,7 @@
 
 ### MEMBERS
 
-| <img src="https://github.com/user-attachments/assets/24d0bd6b-0742-486e-990a-9570e62096e5" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/5295a4ad-e426-4cd8-8bef-c64b53bccc4c" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/d30e8cae-a3ea-41cf-8947-0410776394f9" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/8a1d8b6a-f243-4b41-877d-78a48e6fde0f" width="200" height="200"/> | <img src="https://github.com/user-attachments/assets/864a519a-10ea-4f2a-b020-0f20b893f01a" width="200" height="200"/> |
+| <img src="https://github.com/user-attachments/assets/24d0bd6b-0742-486e-990a-9570e62096e5" width="200" height="160"/> | <img src="https://github.com/user-attachments/assets/5295a4ad-e426-4cd8-8bef-c64b53bccc4c" width="200" height="160"/> | <img src="https://github.com/user-attachments/assets/d30e8cae-a3ea-41cf-8947-0410776394f9" width="200" height="160"/> | <img src="https://github.com/user-attachments/assets/8a1d8b6a-f243-4b41-877d-78a48e6fde0f" width="200" height="160"/> | <img src="https://github.com/user-attachments/assets/864a519a-10ea-4f2a-b020-0f20b893f01a" width="200" height="160"/> |
 | :---: | :---: | :---: | :---: | :---: |
 | [김예진](https://github.com/yeyechu) | [배형준](https://github.com/BaeHyungJoon) | [송재현](https://github.com/mongsam2) | [이재효](https://github.com/jxxhyo) | [차성연](https://github.com/MICHAA4) |
 
